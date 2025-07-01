@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
 import './App.css';
 
 function App() {
@@ -16,6 +16,13 @@ function App() {
     comment: ''
   });
   const [errors, setErrors] = useState({});
+  const [submissions, setSubmissions] = useState([]);
+
+  useEffect(() => {
+    fetch("http://localhost:8000/submissions/")
+      .then(res => res.json())
+      .then(data => setSubmissions(data));
+  }, []);
 
   const handleAdminLogin = (e) => {
     e.preventDefault();
@@ -112,6 +119,24 @@ function App() {
         comment: ''
       });
     }
+    
+    // Отправка формы на сервер
+    const formPayload = new FormData();
+    Object.entries(formData).forEach(([key, value]) => {
+      formPayload.append(key, value);
+    });
+
+    fetch("http://localhost:8000/submit/", {
+      method: "POST",
+      body: formPayload
+    })
+    .then(res => res.json())
+    .then(() => {
+      alert("Форма успешно отправлена!");
+      setFormData({ lastName: '', firstName: '', middleName: '', group: '', supervisor: '', activity: '', file: null, comment: '' });
+    })
+    .catch(() => alert("Ошибка при отправке формы"));
+
   };
 
   const topRightMenu = () => (
@@ -244,7 +269,7 @@ function App() {
         <input name="password" type="password" placeholder="Пароль" />
       
         <button className="button">Войти</button>
-        <a href="#" className="help-link">Проблемы со входом?</a>
+        <a href="#!" className="help-link">Проблемы со входом?</a>
       </form>
       <button onClick={() => setRole(null)} className="help-link">Назад</button>
       <footer>
@@ -272,7 +297,18 @@ function App() {
             </tr>
           </thead>
           <tbody>
-            {/* Данные из сервера */}
+            {submissions.map((entry, idx) => (
+              <tr key={idx}>
+                <td>{entry.last_name}</td>
+                <td>{entry.first_name}</td>
+                <td>{entry.middle_name}</td>
+                <td>{entry.group}</td>
+                <td>{entry.supervisor}</td>
+                <td>{entry.activity}</td>
+                <td>{entry.file_name}</td>
+                <td>{entry.comment}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
