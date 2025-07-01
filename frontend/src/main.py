@@ -1,0 +1,90 @@
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from database import SessionLocal, Submission, init_db
+import shutil
+import os
+
+app = FastAPI()
+
+# Настройка CORS для фронтенда на локалхосте
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Создание папки для файлов, если ещё не создана
+UPLOAD_DIR = "uploaded_files"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+# Инициализация базы данных
+init_db()
+
+#приём формs
+@app.post("/submit/")
+async def receive_submission(
+    last_name: str = Form(...),
+    first_name: str = Form(...),
+    middle_name: str = Form(""),
+    group: str = Form(...),
+    supervisor: str = Form(...),
+    activity: str = Form(...),
+    file: UploadFile = File(...),
+    comment: str = Form("")
+):
+    # Сохраняем файл на диск
+    file_path = os.path.join(UPLOAD_DIR, file.filename)
+
+    try:
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка при сохранении файла: {str(e)}")
+
+    # Запись данных в базу
+    db = SessionLocal()
+    try:
+        new_entry = Submission(
+            last_name=last_name,
+            first_name=first_name,
+            middle_name=middle_name,
+            group=group,
+            supervisor=supervisor,
+            activity=activity,
+            file_name=file.filename,
+            comment=comment
+        )
+        db.add(new_entry)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Ошибка записи в базу: {str(e)}")
+    finally:
+        db.close()
+
+    return {"status": "ok", "message": "Форма успешно сохранена"}
+
+
+# получение всех записей
+@app.get("/submissions/")
+def list_submissions():
+    db = SessionLocal()
+    try:
+        entries = db.query(Submission).all()
+        return [
+            {
+                "last_name": s.last_name,
+                "first_name": s.first_name,
+                "middle_name": s.middle_name,
+                "group": s.group,
+                "supervisor": s.supervisor,
+                "activity": s.activity,
+                "file_name": s.file_name,
+                "comment": s.comment
+            }
+            for s in entries
+        ]
+    finally:
+        db.close()
