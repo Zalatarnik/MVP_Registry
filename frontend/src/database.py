@@ -10,7 +10,6 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 class Submission(Base):
     __tablename__ = "students" 
-
     id = Column(Integer, primary_key=True, index=True)
     last_name = Column(String)
     first_name = Column(String)
