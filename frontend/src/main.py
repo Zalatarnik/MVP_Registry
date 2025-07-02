@@ -32,6 +32,7 @@ async def receive_submission(
     group: str = Form(...),
     supervisor: str = Form(...),
     activity: str = Form(...),
+    event_status: str = Form(...),
     file: UploadFile = File(...),
     comment: str = Form("")
 ):
@@ -55,8 +56,10 @@ async def receive_submission(
             group=group,
             supervisor=supervisor,
             activity=activity,
+            event_status=event_status,
             file_name=file.filename,
-            comment=comment
+            comment=comment,
+            status="pending"
         )
         db.add(new_entry)
         db.commit()
@@ -84,8 +87,10 @@ def list_submissions():
                 "group": s.group,
                 "supervisor": s.supervisor,
                 "activity": s.activity,
+                "event_status": s.event_status,
                 "file_name": s.file_name,
-                "comment": s.comment
+                "comment": s.comment,
+                "status": s.status
             }
             for s in entries
         ]

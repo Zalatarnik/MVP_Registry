@@ -18,8 +18,11 @@ class Submission(Base):
     group = Column(String)
     supervisor = Column(String)
     activity = Column(String)
+    event_status = Column(String)
     file_name = Column(String)
     comment = Column(String)
+    status = Column(String, default='pending')
+
 
 def init_db():
     Base.metadata.create_all(bind=engine)

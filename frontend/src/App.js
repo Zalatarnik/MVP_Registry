@@ -13,11 +13,71 @@ function App() {
     group: '',
     supervisor: '',
     activity: '',
+    eventStatus: '',
     file: null,
     comment: ''
   });
   const [errors, setErrors] = useState({});
   const [submissions, setSubmissions] = useState([]);
+
+  const [pendingFilter, setPendingFilter] = useState({ search: '', sort: '' });
+  const [confirmedFilter, setConfirmedFilter] = useState({ search: '', sort: '' });
+  const [selectedPending, setSelectedPending] = useState([]);
+  const [selectedConfirmed, setSelectedConfirmed] = useState([]);
+  const [pendingPage, setPendingPage] = useState(1);
+  const [confirmedPage, setConfirmedPage] = useState(1);
+
+  const itemsPerPage = 5; // сколько записей на странице
+
+  // Фильтрация и сортировка первой таблицы
+  const filteredPending = submissions
+    .filter(s => s.status === 'pending')
+    .filter(s =>
+      s.last_name.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
+      s.supervisor.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
+      s.group.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
+      s.activity.toLowerCase().includes(pendingFilter.search.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (pendingFilter.sort === 'alpha') {
+        return a.last_name.localeCompare(b.last_name);
+      } else if (pendingFilter.sort === 'recent') {
+        // Можно заменить на реальное поле created_at
+        return b.id - a.id; // по убыванию ID
+      }
+      return 0;
+    });
+
+  // Пагинация первой таблицы
+  const totalPendingPages = Math.ceil(filteredPending.length / itemsPerPage);
+  const paginatedPending = filteredPending.slice(
+    (pendingPage - 1) * itemsPerPage,
+    pendingPage * itemsPerPage
+  );
+
+  // Аналогично для второй таблицы
+  const filteredConfirmed = submissions
+    .filter(s => s.status === 'confirmed')
+    .filter(s =>
+      s.last_name.toLowerCase().includes(confirmedFilter.search.toLowerCase()) ||
+      s.supervisor.toLowerCase().includes(confirmedFilter.search.toLowerCase()) ||
+      s.group.toLowerCase().includes(confirmedFilter.search.toLowerCase()) ||
+      s.activity.toLowerCase().includes(confirmedFilter.search.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (confirmedFilter.sort === 'alpha') {
+        return a.last_name.localeCompare(b.last_name);
+      } else if (confirmedFilter.sort === 'recent') {
+        return b.id - a.id;
+      }
+      return 0;
+    });
+
+  const totalConfirmedPages = Math.ceil(filteredConfirmed.length / itemsPerPage);
+  const paginatedConfirmed = filteredConfirmed.slice(
+    (confirmedPage - 1) * itemsPerPage,
+    confirmedPage * itemsPerPage
+  );
 
   // при входе в админ - загрузка данные с сервера
   useEffect(() => {
@@ -106,6 +166,11 @@ function App() {
       newErrors.activity = 'Название должно содержать минимум 3 символа';
     }
     
+    // Проверка статуса мероприятия
+    if (!formData.eventStatus.trim()) {
+      newErrors.eventStatus = 'Выберите статус мероприятия';
+    }
+
     // Проверка файла
     if (!formData.file) {
       newErrors.file = 'Загрузите файл';
@@ -136,6 +201,7 @@ function App() {
     formPayload.append("group", formData.group);
     formPayload.append("supervisor", formData.supervisor);
     formPayload.append("activity", formData.activity);
+    formPayload.append("event_status", formData.eventStatus);
     formPayload.append("file", formData.file); 
     formPayload.append("comment", formData.comment);
 
@@ -160,6 +226,7 @@ function App() {
           group: '',
           supervisor: '',
           activity: '',
+          eventStatus: '',
           file: null,
           comment: ''
         });
@@ -290,6 +357,23 @@ function App() {
           {errors.activity && <span className="error-message">{errors.activity}</span>}
         </div>
         <div className="form-group">
+          <label>Статус мероприятия*</label>
+          <select
+            name="eventStatus"
+            value={formData.eventStatus || ''}
+            onChange={handleInputChange}
+            className='filter-select'
+          >
+            <option value="">-- Выберите статус --</option>
+            <option value="внутривузовский">Внутривузовский</option>
+            <option value="региональный">Региональный</option>
+            <option value="городской">Городской</option>
+            <option value="всероссийский">Всероссийский</option>
+            <option value="международный">Международный</option>
+          </select>
+          {errors.eventStatus && <span className="error-message">{errors.eventStatus}</span>}
+        </div>
+        <div className="form-group">
           <label>Загрузите файл, подтверждающий участие*</label>
           <input 
             type="file" 
@@ -335,11 +419,39 @@ function App() {
   const renderAdminPanel = () => (
     <div className="admin-panel">
       {topRightMenu()}
-      <h2>Данные пользователей</h2>
+
+      <h2>Ожидают подтверждения</h2>
+
+      {/* Фильтр */}
+      <div className='filter-row'>
+        <input
+          type="text"
+          placeholder="Поиск..."
+          value={pendingFilter.search}
+          onChange={(e) =>
+            setPendingFilter({ ...pendingFilter, search: e.target.value })
+          }
+          className='filter-input'
+        />
+        <select
+          value={pendingFilter.sort}
+          onChange={(e) =>
+            setPendingFilter({ ...pendingFilter, sort: e.target.value })
+          }
+          className='filter-input'
+        >
+          <option value="">Без сортировки</option>
+          <option value="alpha">По алфавиту (ФИО)</option>
+          <option value="recent">Недавние</option>
+        </select>
+      </div>
+
+      {/* Первая таблица */}
       <div className="white-box">
         <table>
           <thead>
             <tr>
+              <th></th>
               <th>Фамилия</th>
               <th>Имя</th>
               <th>Отчество</th>
@@ -347,13 +459,29 @@ function App() {
               <th>Группа</th>
               <th>Руководитель</th>
               <th>Активность</th>
+              <th>Статус</th>
               <th>Файл</th>
               <th>Комментарий</th>
             </tr>
           </thead>
           <tbody>
-            {submissions.map((entry, idx) => (
-              <tr key={idx}>
+            {paginatedPending.map((entry) => (
+              <tr key={entry.id}>
+                <td>
+                  <input
+                    type="checkbox"
+                    checked={selectedPending.includes(entry.id)}
+                    onChange={() => {
+                      if (selectedPending.includes(entry.id)) {
+                        setSelectedPending(
+                          selectedPending.filter((id) => id !== entry.id)
+                        );
+                      } else {
+                        setSelectedPending([...selectedPending, entry.id]);
+                      }
+                    }}
+                  />
+                </td>
                 <td>{entry.last_name}</td>
                 <td>{entry.first_name}</td>
                 <td>{entry.middle_name}</td>
@@ -361,17 +489,165 @@ function App() {
                 <td>{entry.group}</td>
                 <td>{entry.supervisor}</td>
                 <td>{entry.activity}</td>
+                <td>{entry.event_status}</td>
                 <td>{entry.file_name}</td>
                 <td>{entry.comment}</td>
               </tr>
             ))}
           </tbody>
         </table>
+
+        {/* Пагинация */}
+        <div style={{ marginTop: '10px' }}>
+          Страница:
+          {[...Array(totalPendingPages).keys()].map((page) => (
+            <button
+              key={page + 1}
+              onClick={() => setPendingPage(page + 1)}
+              className={pendingPage === page + 1 ? 'button' : ''}
+            >
+              {page + 1}
+            </button>
+          ))}
+        </div>
       </div>
-      <button className="button">Сохранить</button>
+
+
+      {/* Кнопки под таблицей */}
+      <div className='button-row-outside'
+        >
+          <button
+            className="button"
+            onClick={() => {
+              const allIds = filteredPending.map((entry) => entry.id);
+              setSelectedPending(allIds);
+            }}
+          >
+            Подтвердить всех
+          </button>
+          <button className="button">Подтвердить выбранных</button>
+          <button className="button">Сохранить выбранных</button>
+          <button className="button">Сохранить всех</button>
+        </div>
+
+
+      
+      {/* Вторая таблица */}
+      <h2 style={{ marginTop: '40px' }}>Данные пользователей</h2>
+
+      {/* Фильтр */}
+      <div className="filter-row">
+        <input
+          type="text"
+          placeholder="Поиск..."
+          value={confirmedFilter.search}
+          onChange={(e) =>
+            setConfirmedFilter({ ...confirmedFilter, search: e.target.value })
+          }
+          className="filter-input"
+        />
+        <select
+          value={confirmedFilter.sort}
+          onChange={(e) =>
+            setConfirmedFilter({ ...confirmedFilter, sort: e.target.value })
+          }
+          className="filter-select"
+        >
+          <option value="">Без сортировки</option>
+          <option value="alpha">По алфавиту (Фамилия)</option>
+          <option value="recent">Недавние</option>
+        </select>
+      </div>
+
+      <div className="white-box">
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>Фамилия</th>
+              <th>Имя</th>
+              <th>Отчество</th>
+              <th>Студенческий</th>
+              <th>Группа</th>
+              <th>Руководитель</th>
+              <th>Активность</th>
+              <th>Статус</th>
+              <th>Файл</th>
+              <th>Комментарий</th>
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedConfirmed.map((entry) => (
+              <tr key={entry.id}>
+                <td>
+                  <input
+                    type="checkbox"
+                    checked={selectedConfirmed.includes(entry.id)}
+                    onChange={() => {
+                      if (selectedConfirmed.includes(entry.id)) {
+                        setSelectedConfirmed(
+                          selectedConfirmed.filter((id) => id !== entry.id)
+                        );
+                      } else {
+                        setSelectedConfirmed([...selectedConfirmed, entry.id]);
+                      }
+                    }}
+                  />
+                </td>
+                <td>{entry.last_name}</td>
+                <td>{entry.first_name}</td>
+                <td>{entry.middle_name}</td>
+                <td>{entry.student_id}</td>
+                <td>{entry.group}</td>
+                <td>{entry.supervisor}</td>
+                <td>{entry.activity}</td>
+                <td>{entry.event_status}</td>
+                <td>{entry.file_name}</td>
+                <td>{entry.comment}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {/* Пагинация второй */}
+        <div style={{ marginTop: '10px' }}>
+          Страница:
+          {[...Array(totalConfirmedPages).keys()].map((page) => (
+            <button
+              key={page + 1}
+              onClick={() => setConfirmedPage(page + 1)}
+              className={confirmedPage === page + 1 ? 'button' : ''}
+            >
+              {page + 1}
+            </button>
+          ))}
+        </div>
+
+        
+      </div>
+
+      {/* Кнопки под таблицей */}
+      <div className='button-row-outside'>
+        <button className="button">Сохранить<br /> выбранных</button>
+
+        <button
+           className="button"
+           onClick={() => {
+             const allIds = filteredConfirmed.map((entry) => entry.id);
+            setSelectedConfirmed(allIds);
+          }}>
+           Сохранить<br />  всех
+         </button>
+
+      </div>
+
     </div>
   );
-  
+    
+
+
+
+
   return (
     <div className="app-container">
       {role === null && renderInitialScreen()}
