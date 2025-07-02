@@ -9,6 +9,7 @@ function App() {
     lastName: '',
     firstName: '',
     middleName: '',
+    studentID: '',
     group: '',
     supervisor: '',
     activity: '',
@@ -76,6 +77,13 @@ function App() {
     if (formData.middleName.trim() && !/^[А-Яа-яЁё\s-]*$/.test(formData.middleName)) {
       newErrors.middleName = 'Отчество должно содержать только русские буквы';
     }
+
+    // Проверка студенческого (только цифры)
+    if (!formData.studentID.trim()) {
+      newErrors.studentID = 'Введите номер студенческого билета';
+    } else if (!/^\d+$/.test(formData.studentID)) {
+      newErrors.studentID = 'Номер студенческого должен содержать только цифры';
+    }
     
     // Проверка группы (формат ПИб-1 или 2-ПМИб-1)
     if (!formData.group.trim()) {
@@ -124,6 +132,7 @@ function App() {
     formPayload.append("last_name", formData.lastName);
     formPayload.append("first_name", formData.firstName);
     formPayload.append("middle_name", formData.middleName);
+    formPayload.append("student_id", formData.studentID);
     formPayload.append("group", formData.group);
     formPayload.append("supervisor", formData.supervisor);
     formPayload.append("activity", formData.activity);
@@ -237,6 +246,17 @@ function App() {
           {errors.middleName && <span className="error-message">{errors.middleName}</span>}
         </div>
         <div className="form-group">
+          <label>Номер студенческого*</label>
+          <input 
+            name="studentID"
+            placeholder="Введите номер студенческого" 
+            value={formData.studentID}
+            onChange={handleInputChange}
+            className={errors.studentID ? 'error' : ''}
+          />
+          {errors.studentID && <span className="error-message">{errors.studentID}</span>}
+        </div>
+        <div className="form-group">
           <label>Название группы*</label>
           <input 
             name="group"
@@ -323,6 +343,7 @@ function App() {
               <th>Фамилия</th>
               <th>Имя</th>
               <th>Отчество</th>
+              <th>Студенческий</th>
               <th>Группа</th>
               <th>Руководитель</th>
               <th>Активность</th>
@@ -336,6 +357,7 @@ function App() {
                 <td>{entry.last_name}</td>
                 <td>{entry.first_name}</td>
                 <td>{entry.middle_name}</td>
+                <td>{entry.student_id}</td>
                 <td>{entry.group}</td>
                 <td>{entry.supervisor}</td>
                 <td>{entry.activity}</td>

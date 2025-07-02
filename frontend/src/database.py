@@ -14,6 +14,7 @@ class Submission(Base):
     last_name = Column(String)
     first_name = Column(String)
     middle_name = Column(String)
+    student_id = Column(String)
     group = Column(String)
     supervisor = Column(String)
     activity = Column(String)
