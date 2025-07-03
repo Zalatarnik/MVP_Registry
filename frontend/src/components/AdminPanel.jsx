@@ -17,6 +17,7 @@ export default function AdminPanel({
     <div className="admin-panel">
     {TopMenu}
     <h2>Ожидают подтверждения</h2>
+
       {/* Фильтр */}
       <div className='filter-row'>
         <input
@@ -30,14 +31,17 @@ export default function AdminPanel({
         />
         <select
           value={pendingFilter.sort}
-          onChange={(e) =>
-            setPendingFilter({ ...pendingFilter, sort: e.target.value })
-          }
+          onChange={(e) => setPendingFilter({ ...pendingFilter, sort: e.target.value })}
           className='filter-input'
         >
-          <option value="">Без сортировки</option>
+          <option value="">Без фильтров</option>
+          <option value="recent">Недавно прошедшие</option>
           <option value="alpha">По алфавиту (ФИО)</option>
-          <option value="recent">Недавние</option>
+          <option value="intra">Только внутривузовские</option>
+          <option value="region">Только региональные</option>
+          <option value="city">Только городские</option>
+          <option value="national">Только всероссийские</option>
+          <option value="international">Только международные</option>
         </select>
       </div>
       
@@ -55,6 +59,9 @@ export default function AdminPanel({
               <th>Руководитель</th>
               <th>Активность</th>
               <th>Статус</th>
+              <th>Организатор</th>
+              <th>Место</th>
+              <th>Дата</th>
               <th>Файл</th>
               <th>Комментарий</th>
             </tr>
@@ -85,6 +92,9 @@ export default function AdminPanel({
                 <td>{entry.supervisor}</td>
                 <td>{entry.activity}</td>
                 <td>{entry.event_status}</td>
+                <td>{entry.organizer}</td>
+                <td>{entry.location}</td>
+                <td>{entry.event_date}</td>
                 <td>{entry.file_name}</td>
                 <td>{entry.comment}</td>
               </tr>
@@ -108,7 +118,7 @@ export default function AdminPanel({
       </div>
 
 
-      {/* Кнопки под таблицей */}
+      {/* Кнопки под 1 таблицей */}
       <div className='button-row-outside'
         >
           <button
@@ -121,8 +131,8 @@ export default function AdminPanel({
             Подтвердить всех
           </button>
           <button className="button">Подтвердить выбранных</button>
-          <button className="button">Сохранить выбранных</button>
-          <button className="button">Сохранить всех</button>
+          <button className="button">Отклонить всех</button>
+          <button className="button">Отклонить выбранных</button>
         </div>
 
 
@@ -143,14 +153,17 @@ export default function AdminPanel({
         />
         <select
           value={confirmedFilter.sort}
-          onChange={(e) =>
-            setConfirmedFilter({ ...confirmedFilter, sort: e.target.value })
-          }
-          className="filter-select"
+          onChange={(e) => setConfirmedFilter({ ...confirmedFilter, sort: e.target.value })}
+          className='filter-input'
         >
-          <option value="">Без сортировки</option>
-          <option value="alpha">По алфавиту (Фамилия)</option>
-          <option value="recent">Недавние</option>
+          <option value="">Без фильтров</option>
+          <option value="recent">Недавно прошедшие</option>
+          <option value="alpha">По алфавиту (ФИО)</option>
+          <option value="intra">Только внутривузовские</option>
+          <option value="region">Только региональные</option>
+          <option value="city">Только городские</option>
+          <option value="national">Только всероссийские</option>
+          <option value="international">Только международные</option>
         </select>
       </div>
 
@@ -167,6 +180,9 @@ export default function AdminPanel({
               <th>Руководитель</th>
               <th>Активность</th>
               <th>Статус</th>
+              <th>Организатор</th>
+              <th>Место</th>
+              <th>Дата</th>
               <th>Файл</th>
               <th>Комментарий</th>
             </tr>
@@ -197,6 +213,9 @@ export default function AdminPanel({
                 <td>{entry.supervisor}</td>
                 <td>{entry.activity}</td>
                 <td>{entry.event_status}</td>
+                <td>{entry.organizer}</td>
+                <td>{entry.location}</td>
+                <td>{entry.event_date}</td>
                 <td>{entry.file_name}</td>
                 <td>{entry.comment}</td>
               </tr>
@@ -221,10 +240,8 @@ export default function AdminPanel({
         
       </div>
 
-      {/* Кнопки под таблицей */}
+      {/* Кнопки под 2 таблицей */}
       <div className='button-row-outside'>
-        <button className="button">Сохранить<br /> выбранных</button>
-
         <button
            className="button"
            onClick={() => {
@@ -234,6 +251,7 @@ export default function AdminPanel({
            Сохранить<br />  всех
          </button>
 
+         <button className="button">Сохранить<br /> выбранных</button>
       </div>
 
     </div>

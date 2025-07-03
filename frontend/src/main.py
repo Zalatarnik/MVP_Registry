@@ -33,6 +33,9 @@ async def receive_submission(
     supervisor: str = Form(...),
     activity: str = Form(...),
     event_status: str = Form(...),
+    organizer: str = Form(...),
+    location: str = Form(...),
+    event_date: str = Form(...),
     file: UploadFile = File(...),
     comment: str = Form("")
 ):
@@ -57,6 +60,9 @@ async def receive_submission(
             supervisor=supervisor,
             activity=activity,
             event_status=event_status,
+            organizer=organizer,
+            location=location,
+            event_date=event_date,
             file_name=file.filename,
             comment=comment,
             status="pending"
@@ -80,6 +86,7 @@ def list_submissions():
         entries = db.query(Submission).all()
         return [
             {
+                "id": s.id,
                 "last_name": s.last_name,
                 "first_name": s.first_name,
                 "middle_name": s.middle_name,
@@ -88,6 +95,9 @@ def list_submissions():
                 "supervisor": s.supervisor,
                 "activity": s.activity,
                 "event_status": s.event_status,
+                "organizer": s.organizer,
+                "location": s.location,
+                "event_date": s.event_date,
                 "file_name": s.file_name,
                 "comment": s.comment,
                 "status": s.status

@@ -13,6 +13,9 @@ export default function useSubmissions() {
     supervisor: '',
     activity: '',
     eventStatus: '',
+    organizer: '',
+    location: '',
+    event_date: '',
     file: null,
     comment: ''
   });
@@ -65,6 +68,7 @@ export default function useSubmissions() {
       newErrors.studentID = 'Номер студенческого должен содержать только цифры';
     }
     
+    
     // Проверка группы (формат ПИб-1 или 2-ПМИб-1)
     if (!formData.group.trim()) {
       newErrors.group = 'Введите название группы';
@@ -91,6 +95,21 @@ export default function useSubmissions() {
       newErrors.eventStatus = 'Выберите статус мероприятия';
     }
 
+    // Проверка организатора мероприятия
+    if (!formData.organizer.trim()) {
+      newErrors.organizer = 'Введите организатора';
+    }
+
+    // Проверка места провидения мероприятия
+    if (!formData.location.trim()) {
+      newErrors.location = 'Введите место проведения';
+    }
+
+    // Проверка даты провидения мероприятия
+    if (!formData.event_date.trim()) {
+      newErrors.event_date = 'Выберите дату проведения';
+    }
+
     // Проверка файла
     if (!formData.file) {
       newErrors.file = 'Загрузите файл';
@@ -113,6 +132,9 @@ export default function useSubmissions() {
     formPayload.append("supervisor", formData.supervisor);
     formPayload.append("activity", formData.activity);
     formPayload.append("event_status", formData.eventStatus);
+    formPayload.append("organizer", formData.organizer);
+    formPayload.append("location", formData.location);
+    formPayload.append("event_date", formData.event_date);
     formPayload.append("file", formData.file); 
     formPayload.append("comment", formData.comment);
 
@@ -134,10 +156,14 @@ export default function useSubmissions() {
           lastName: '',
           firstName: '',
           middleName: '',
+          studentID: '',
           group: '',
           supervisor: '',
           activity: '',
           eventStatus: '',
+          organizer: '',
+          location: '',
+          event_date: '',
           file: null,
           comment: ''
         });
@@ -153,15 +179,25 @@ export default function useSubmissions() {
       });
   };
 
-  // Фильтрация и сортировка первой таблицы
+  // Фильтрация и сортировка 1 таблицы
   const filteredPending = submissions
   .filter(s => s.status === 'pending')
   .filter(s =>
     s.last_name.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
     s.supervisor.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
     s.group.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
-    s.activity.toLowerCase().includes(pendingFilter.search.toLowerCase())
+    s.activity.toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
+    String(s.student_id).toLowerCase().includes(pendingFilter.search.toLowerCase()) ||
+    s.organizer.toLowerCase().includes(pendingFilter.search.toLowerCase())
   )
+  .filter(s => {
+    if (pendingFilter.sort === "intra" && s.event_status !== "внутривузовский") return false;
+    if (pendingFilter.sort === "region" && s.event_status !== "региональный") return false;
+    if (pendingFilter.sort === "city" && s.event_status !== "городской") return false;
+    if (pendingFilter.sort === "national" && s.event_status !== "всероссийский") return false;
+    if (pendingFilter.sort === "international" && s.event_status !== "международный") return false;
+    return true;
+  })
   .sort((a, b) => {
     if (pendingFilter.sort === 'alpha') {
       return a.last_name.localeCompare(b.last_name);
@@ -171,30 +207,40 @@ export default function useSubmissions() {
     return 0;
   });
 
-  // Пагинация первой таблицы
+  // Пагинация таблицы
   const totalPendingPages = Math.ceil(filteredPending.length / itemsPerPage);
   const paginatedPending = filteredPending.slice(
     (pendingPage - 1) * itemsPerPage,
     pendingPage * itemsPerPage
   );
 
-  // Аналогично для второй таблицы
+  // Фильтрация и сортировка 2 таблицы
   const filteredConfirmed = submissions
-    .filter(s => s.status === 'confirmed')
-    .filter(s =>
-      s.last_name.toLowerCase().includes(confirmedFilter.search.toLowerCase()) ||
-      s.supervisor.toLowerCase().includes(confirmedFilter.search.toLowerCase()) ||
-      s.group.toLowerCase().includes(confirmedFilter.search.toLowerCase()) ||
-      s.activity.toLowerCase().includes(confirmedFilter.search.toLowerCase())
-    )
-    .sort((a, b) => {
-      if (confirmedFilter.sort === 'alpha') {
-        return a.last_name.localeCompare(b.last_name);
-      } else if (confirmedFilter.sort === 'recent') {
-        return b.id - a.id;
-      }
-      return 0;
-    });
+  .filter(s => s.status === 'confirmed')
+  .filter(s =>
+    s.last_name.toLowerCase().includes(confirmedFilter.search.toLowerCase()) ||
+    s.supervisor.toLowerCase().includes(confirmedFilter.search.toLowerCase()) ||
+    s.group.toLowerCase().includes(confirmedFilter.search.toLowerCase()) ||
+    s.activity.toLowerCase().includes(confirmedFilter.search.toLowerCase()) ||
+    String(s.student_id).toLowerCase().includes(confirmedFilter.search.toLowerCase()) ||
+    s.organizer.toLowerCase().includes(confirmedFilter.search.toLowerCase())
+  )
+  .filter(s => {
+    if (confirmedFilter.sort === "intra" && s.event_status !== "внутривузовский") return false;
+    if (confirmedFilter.sort === "region" && s.event_status !== "региональный") return false;
+    if (confirmedFilter.sort === "city" && s.event_status !== "городской") return false;
+    if (confirmedFilter.sort === "national" && s.event_status !== "всероссийский") return false;
+    if (confirmedFilter.sort === "international" && s.event_status !== "международный") return false;
+    return true;
+  })
+  .sort((a, b) => {
+    if (confirmedFilter.sort === 'alpha') {
+      return a.last_name.localeCompare(b.last_name);
+    } else if (confirmedFilter.sort === 'recent') {
+      return b.id - a.id;
+    }
+    return 0;
+  });
 
   const totalConfirmedPages = Math.ceil(filteredConfirmed.length / itemsPerPage);
   const paginatedConfirmed = filteredConfirmed.slice(

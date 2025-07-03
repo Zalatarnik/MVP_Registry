@@ -3,7 +3,7 @@ import './App.css';
 import InitialScreen from './components/InitialScreen';
 import AdminLogin from './components/AdminLogin';
 import TopMenu from './components/TopMenu';
-import UserForm from './components/UserForm';
+import UserPanel from './components/UserPanel';
 import AdminPanel from './components/AdminPanel';
 import useSubmissions from './hooks/useSubmissions';
 
@@ -71,7 +71,7 @@ function App() {
           totalConfirmedPages={totalConfirmedPages}
         />}
       {role === 'user' &&
-        <UserForm
+        <UserPanel
           TopMenu={<TopMenu showMenu={showMenu} setShowMenu={setShowMenu} setRole={setRole} setAdminLoggedIn={setAdminLoggedIn} />}
           formData={formData}
           setFormData={setFormData}

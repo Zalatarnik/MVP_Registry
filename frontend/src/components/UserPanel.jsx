@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function UserForm({ TopMenu, formData, setFormData, errors, setErrors, validateForm, handleSubmit }) {
+export default function UserPanel({ TopMenu, formData, setFormData, errors, setErrors, validateForm, handleSubmit }) {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -19,6 +19,7 @@ export default function UserForm({ TopMenu, formData, setFormData, errors, setEr
     <div className="form-container">
       {TopMenu}
      <h2>Введите информацию</h2>
+
       <form className="user-form" onSubmit={handleSubmit}>
         <div className="form-group">
           <label>Фамилия*</label>
@@ -31,6 +32,7 @@ export default function UserForm({ TopMenu, formData, setFormData, errors, setEr
           />
           {errors.lastName && <span className="error-message">{errors.lastName}</span>}
         </div>
+
         <div className="form-group">
           <label>Имя*</label>
           <input 
@@ -42,6 +44,7 @@ export default function UserForm({ TopMenu, formData, setFormData, errors, setEr
           />
           {errors.firstName && <span className="error-message">{errors.firstName}</span>}
         </div>
+
         <div className="form-group">
           <label>Отчество</label>
           <input 
@@ -53,6 +56,7 @@ export default function UserForm({ TopMenu, formData, setFormData, errors, setEr
           />
           {errors.middleName && <span className="error-message">{errors.middleName}</span>}
         </div>
+
         <div className="form-group">
           <label>Номер студенческого*</label>
           <input 
@@ -64,6 +68,7 @@ export default function UserForm({ TopMenu, formData, setFormData, errors, setEr
           />
           {errors.studentID && <span className="error-message">{errors.studentID}</span>}
         </div>
+
         <div className="form-group">
           <label>Название группы*</label>
           <input 
@@ -75,6 +80,7 @@ export default function UserForm({ TopMenu, formData, setFormData, errors, setEr
           />
           {errors.group && <span className="error-message">{errors.group}</span>}
         </div>
+
         <div className="form-group">
           <label>ФИО руководителя*</label>
           <input 
@@ -86,6 +92,7 @@ export default function UserForm({ TopMenu, formData, setFormData, errors, setEr
           />
           {errors.supervisor && <span className="error-message">{errors.supervisor}</span>}
         </div>
+
         <div className="form-group">
           <label>Название активности / соревнования*</label>
           <input 
@@ -97,14 +104,14 @@ export default function UserForm({ TopMenu, formData, setFormData, errors, setEr
           />
           {errors.activity && <span className="error-message">{errors.activity}</span>}
         </div>
+
         <div className="form-group">
           <label>Статус мероприятия*</label>
           <select
             name="eventStatus"
             value={formData.eventStatus || ''}
             onChange={handleInputChange}
-            className='filter-select'
-          >
+            className='filter-select'>
             <option value="">-- Выберите статус --</option>
             <option value="внутривузовский">Внутривузовский</option>
             <option value="региональный">Региональный</option>
@@ -114,6 +121,43 @@ export default function UserForm({ TopMenu, formData, setFormData, errors, setEr
           </select>
           {errors.eventStatus && <span className="error-message">{errors.eventStatus}</span>}
         </div>
+
+        <div className="form-group">
+          <label>Организатор*</label>
+          <input
+            name="organizer"
+            placeholder="Введите организатора"
+            value={formData.organizer}
+            onChange={handleInputChange}
+            className={errors.organizer ? 'error' : ''}
+          />
+          {errors.organizer && <span className="error-message">{errors.organizer}</span>}
+        </div>
+
+        <div className="form-group">
+          <label>Место проведения*</label>
+          <input
+            name="location"
+            placeholder="Введите место проведения"
+            value={formData.location}
+            onChange={handleInputChange}
+            className={errors.location ? 'error' : ''}
+          />
+          {errors.location && <span className="error-message">{errors.location}</span>}
+        </div>
+
+        <div className="form-group">
+          <label>Дата проведения*</label>
+          <input
+            name="event_date"
+            type="date"
+            value={formData.event_date}
+            onChange={handleInputChange}
+            className={errors.event_date ? 'error' : ''}
+          />
+          {errors.event_date && <span className="error-message">{errors.event_date}</span>}
+        </div>
+
         <div className="form-group">
           <label>Загрузите файл, подтверждающий участие*</label>
           <input 
@@ -123,6 +167,7 @@ export default function UserForm({ TopMenu, formData, setFormData, errors, setEr
           />
           {errors.file && <span className="error-message">{errors.file}</span>}
         </div>
+
         <div className="form-group">
           <label>Комментарий к файлу</label>
           <textarea 
@@ -132,6 +177,7 @@ export default function UserForm({ TopMenu, formData, setFormData, errors, setEr
             onChange={handleInputChange}
           ></textarea>
         </div>
+
         <button className="button" style={{margin: 0}} type="submit">Отправить</button>
       </form>
     </div>
