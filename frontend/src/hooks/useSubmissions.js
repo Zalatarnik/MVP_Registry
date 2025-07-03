@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import * as XLSX from 'xlsx'; 
 
 export default function useSubmissions() {
   const [role, setRole] = useState(null);
@@ -64,6 +65,48 @@ const deleteSubmissions = (ids) => {
       setSelectedPending([]);
     });
 };
+
+  const exportToExcel = (entries, fileName = "export.xlsx") => {
+    if (entries.length === 0) {
+      alert("Нет данных для экспорта");
+      return;
+    }
+
+   
+  const formatted = entries.map((entry) => ({
+    "Фамилия": entry.last_name,
+    "Имя": entry.first_name,
+    "Отчество": entry.middle_name,
+    "Студенческий": entry.student_id,
+    "Группа": entry.group,
+    "Руководитель": entry.supervisor,
+    "Активность": entry.activity,
+    "Статус мероприятия": entry.event_status,
+    "Организатор": entry.organizer,
+    "Место": entry.location,
+    "Дата": entry.event_date,
+    "Файл": entry.file_name
+    ? { f: `=HYPERLINK("http://localhost:8000/files/${entry.file_name}", "${entry.file_name}")` }
+    : "",
+    "Комментарий": entry.comment
+  }));
+  const worksheet = XLSX.utils.json_to_sheet(formatted);
+
+    const maxLengths = formatted.reduce((acc, row) => {
+      Object.keys(row).forEach((key, colIdx) => {
+        const cellValue = typeof row[key] === 'object' ? row[key].f : row[key];
+        const len = cellValue ? cellValue.toString().length : 0;
+        acc[colIdx] = Math.max(acc[colIdx] || 10, len);
+      });
+      return acc;
+    }, []);
+    worksheet['!cols'] = maxLengths.map(len => ({ width: len + 5 }));
+
+    const workbook = XLSX.utils.book_new(); 
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Данные");
+
+    XLSX.writeFile(workbook, fileName);
+  };
 
   const validateForm = () => {
     const newErrors = {};
@@ -288,6 +331,6 @@ const deleteSubmissions = (ids) => {
     paginatedPending, paginatedConfirmed,
     totalPendingPages, totalConfirmedPages,
     validateForm, handleSubmit, reloadSubmissions, 
-    confirmSubmissions, deleteSubmissions
+    confirmSubmissions, deleteSubmissions, exportToExcel   
   };
 }

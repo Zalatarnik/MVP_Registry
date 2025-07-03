@@ -27,7 +27,7 @@ function App() {
     paginatedPending, paginatedConfirmed,
     totalPendingPages, totalConfirmedPages,
     validateForm, handleSubmit, reloadSubmissions,
-    confirmSubmissions, deleteSubmissions
+    confirmSubmissions, deleteSubmissions, exportToExcel   
   } = useSubmissions();
 
   const handleAdminLogin = (e) => {
@@ -72,6 +72,7 @@ function App() {
           totalConfirmedPages={totalConfirmedPages}
           confirmSubmissions={confirmSubmissions}
           deleteSubmissions={deleteSubmissions}
+          exportToExcel={exportToExcel}
         />}
       {role === 'user' &&
         <UserPanel

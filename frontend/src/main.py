@@ -2,6 +2,7 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from database import SessionLocal, Submission, init_db
 from fastapi import Body
+from fastapi.staticfiles import StaticFiles
 import shutil
 import os
 
@@ -133,3 +134,5 @@ def delete_submissions(ids: list[int] = Body(...)):
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         db.close()
+
+app.mount("/files", StaticFiles(directory="uploaded_files"), name="files")

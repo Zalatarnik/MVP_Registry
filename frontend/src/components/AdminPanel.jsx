@@ -12,7 +12,8 @@ export default function AdminPanel({
   filteredPending, filteredConfirmed,
   paginatedPending, paginatedConfirmed,
   totalPendingPages, totalConfirmedPages,
-  confirmSubmissions, deleteSubmissions
+  confirmSubmissions, deleteSubmissions, 
+  exportToExcel   
 }) {
   return (
     <div className="admin-panel">
@@ -257,15 +258,24 @@ export default function AdminPanel({
       {/* Кнопки под 2 таблицей */}
       <div className='button-row-outside'>
         <button
-           className="button"
-           onClick={() => {
-             const allIds = filteredConfirmed.map((entry) => entry.id);
-            setSelectedConfirmed(allIds);
-          }}>
-           Сохранить<br />  всех
-         </button>
+          className="button"
+          onClick={() => exportToExcel(filteredConfirmed, "Все_данные.xlsx")}
+        >
+          Сохранить<br />всех
+        </button>
 
-         <button className="button">Сохранить<br /> выбранных</button>
+        <button
+          className="button"
+          onClick={() => {
+            const selected = filteredConfirmed.filter(entry =>
+              selectedConfirmed.includes(entry.id)
+            );
+            exportToExcel(selected, "Выбранные_данные.xlsx");
+          }}
+          disabled={selectedConfirmed.length === 0}
+        >
+          Сохранить<br />выбранных
+        </button>
       </div>
 
     </div>
