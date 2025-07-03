@@ -6,26 +6,36 @@ import TopMenu from './components/TopMenu';
 import UserPanel from './components/UserPanel';
 import AdminPanel from './components/AdminPanel';
 import useSubmissions from './hooks/useSubmissions';
-import adminsData from './admins.json'; // Импорт файла напрямую
 
 function App() {
   const [role, setRole] = useState(null);
   const [adminLoggedIn, setAdminLoggedIn] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [admins, setAdmins] = useState([]);
-  const [loading, setLoading] = useState(false); // Теперь загрузка не нужна
+  const [loading, setLoading] = useState(true);
   const [currentAdmin, setCurrentAdmin] = useState(null);
 
-  // Загрузка списка администраторов
+  // Загрузка списка администраторов из корневой папки проекта
   useEffect(() => {
-    try {
-      const adminsArray = Object.values(adminsData);
-      setAdmins(adminsArray);
-      console.log('Администраторы загружены:', adminsArray);
-    } catch (error) {
-      console.error('Ошибка при обработке данных администраторов:', error);
-      alert('Ошибка при загрузке данных администраторов. Проверьте формат файла admins.json');
-    }
+    const fetchAdmins = async () => {
+      try {
+        const response = await fetch('/admins.json');
+        if (!response.ok) {
+          throw new Error('Не удалось загрузить данные администраторов');
+        }
+        const data = await response.json();
+        const adminsArray = Object.values(data);
+        setAdmins(adminsArray);
+        console.log('Администраторы загружены:', adminsArray);
+      } catch (error) {
+        console.error('Ошибка при загрузке администраторов:', error);
+        alert('Ошибка при загрузке данных администраторов. Проверьте консоль для подробностей.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAdmins();
   }, []);
 
   const handleAdminLogin = (e) => {
@@ -82,6 +92,15 @@ function App() {
     validateForm, handleSubmit, reloadSubmissions,
     confirmSubmissions, deleteSubmissions, exportToExcel   
   } = useSubmissions();
+
+  if (loading) {
+    return (
+      <div className="loading-screen">
+        <div className="loading-spinner"></div>
+        <p>Загрузка данных администраторов...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="app-container">
