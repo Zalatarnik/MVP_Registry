@@ -1,6 +1,8 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from database import SessionLocal, Submission, init_db
+from fastapi import Body
+from fastapi.staticfiles import StaticFiles
 import shutil
 import os
 
@@ -28,9 +30,14 @@ async def receive_submission(
     last_name: str = Form(...),
     first_name: str = Form(...),
     middle_name: str = Form(""),
+    student_id: str = Form(...), 
     group: str = Form(...),
     supervisor: str = Form(...),
     activity: str = Form(...),
+    event_status: str = Form(...),
+    organizer: str = Form(...),
+    location: str = Form(...),
+    event_date: str = Form(...),
     file: UploadFile = File(...),
     comment: str = Form("")
 ):
@@ -50,11 +57,17 @@ async def receive_submission(
             last_name=last_name,
             first_name=first_name,
             middle_name=middle_name,
+            student_id=student_id,
             group=group,
             supervisor=supervisor,
             activity=activity,
+            event_status=event_status,
+            organizer=organizer,
+            location=location,
+            event_date=event_date,
             file_name=file.filename,
-            comment=comment
+            comment=comment,
+            status="pending"
         )
         db.add(new_entry)
         db.commit()
@@ -75,16 +88,51 @@ def list_submissions():
         entries = db.query(Submission).all()
         return [
             {
+                "id": s.id,
                 "last_name": s.last_name,
                 "first_name": s.first_name,
                 "middle_name": s.middle_name,
+                "student_id": s.student_id,
                 "group": s.group,
                 "supervisor": s.supervisor,
                 "activity": s.activity,
+                "event_status": s.event_status,
+                "organizer": s.organizer,
+                "location": s.location,
+                "event_date": s.event_date,
                 "file_name": s.file_name,
-                "comment": s.comment
+                "comment": s.comment,
+                "status": s.status
             }
             for s in entries
         ]
     finally:
         db.close()
+
+@app.post("/confirm/")
+def confirm_submissions(ids: list[int] = Body(...)):
+    db = SessionLocal()
+    try:
+        db.query(Submission).filter(Submission.id.in_(ids)).update({"status": "confirmed"}, synchronize_session=False)
+        db.commit()
+        return {"status": "ok", "message": "Записи подтверждены"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+@app.post("/delete/")
+def delete_submissions(ids: list[int] = Body(...)):
+    db = SessionLocal()
+    try:
+        db.query(Submission).filter(Submission.id.in_(ids)).delete(synchronize_session=False)
+        db.commit()
+        return {"status": "ok", "message": "Записи удалены"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+app.mount("/files", StaticFiles(directory="uploaded_files"), name="files")

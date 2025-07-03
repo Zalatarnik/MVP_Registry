@@ -18,6 +18,7 @@ body {
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   padding: 40px;
+  overflow-x: auto;
 }
 
 /* Кнопки (единый стиль) */
@@ -117,6 +118,7 @@ body {
 /* Таблица админки */
 .admin-panel table {
   width: 100%;
+  table-layout: auto;
   border-collapse: collapse;
 }
 
@@ -151,4 +153,42 @@ body {
   font-size: 0.8em;
   margin-top: 5px;
   display: block;
+}
+
+/* Блок фильтра*/
+.filter-row {
+  display: flex;
+  gap: 15px; 
+  margin-bottom: 20px; 
+}
+
+.filter-input,
+.filter-select {
+  background: #d0d0d0;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  outline: none;
+}
+
+/* Кнопки вынесены за панель */
+.button-row-outside {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.button {
+  background-color: #a13620;
+  color: #fff;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 25px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.button:hover {
+  background-color: #7c2917;
 }

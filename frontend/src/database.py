@@ -14,11 +14,18 @@ class Submission(Base):
     last_name = Column(String)
     first_name = Column(String)
     middle_name = Column(String)
+    student_id = Column(String)
     group = Column(String)
     supervisor = Column(String)
     activity = Column(String)
+    event_status = Column(String)
+    organizer = Column(String)
+    location = Column(String)
+    event_date = Column(String)
     file_name = Column(String)
     comment = Column(String)
+    status = Column(String, default='pending')
+
 
 def init_db():
     Base.metadata.create_all(bind=engine)
