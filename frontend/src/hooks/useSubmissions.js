@@ -39,6 +39,32 @@ export default function useSubmissions() {
       .then(data => setSubmissions(data));
   };
 
+  const confirmSubmissions = (ids) => {
+  fetch("http://localhost:8000/confirm/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(ids)
+  })
+    .then(res => res.json())
+    .then(() => {
+      reloadSubmissions();
+      setSelectedPending([]); // сбросить выбор
+    });
+};
+
+const deleteSubmissions = (ids) => {
+  fetch("http://localhost:8000/delete/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(ids)
+  })
+    .then(res => res.json())
+    .then(() => {
+      reloadSubmissions();
+      setSelectedPending([]);
+    });
+};
+
   const validateForm = () => {
     const newErrors = {};
     
@@ -261,6 +287,7 @@ export default function useSubmissions() {
     filteredPending, filteredConfirmed,
     paginatedPending, paginatedConfirmed,
     totalPendingPages, totalConfirmedPages,
-    validateForm, handleSubmit, reloadSubmissions
+    validateForm, handleSubmit, reloadSubmissions, 
+    confirmSubmissions, deleteSubmissions
   };
 }

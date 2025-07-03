@@ -26,7 +26,8 @@ function App() {
     filteredPending, filteredConfirmed,
     paginatedPending, paginatedConfirmed,
     totalPendingPages, totalConfirmedPages,
-    validateForm, handleSubmit, reloadSubmissions
+    validateForm, handleSubmit, reloadSubmissions,
+    confirmSubmissions, deleteSubmissions
   } = useSubmissions();
 
   const handleAdminLogin = (e) => {
@@ -69,6 +70,8 @@ function App() {
           paginatedConfirmed={paginatedConfirmed}
           totalPendingPages={totalPendingPages}
           totalConfirmedPages={totalConfirmedPages}
+          confirmSubmissions={confirmSubmissions}
+          deleteSubmissions={deleteSubmissions}
         />}
       {role === 'user' &&
         <UserPanel

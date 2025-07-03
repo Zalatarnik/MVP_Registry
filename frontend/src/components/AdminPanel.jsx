@@ -11,7 +11,8 @@ export default function AdminPanel({
   itemsPerPage,
   filteredPending, filteredConfirmed,
   paginatedPending, paginatedConfirmed,
-  totalPendingPages, totalConfirmedPages
+  totalPendingPages, totalConfirmedPages,
+  confirmSubmissions, deleteSubmissions
 }) {
   return (
     <div className="admin-panel">
@@ -119,21 +120,34 @@ export default function AdminPanel({
 
 
       {/* Кнопки под 1 таблицей */}
-      <div className='button-row-outside'
+      <div className='button-row-outside'>
+        <button
+          className="button"
+          onClick={() => confirmSubmissions(filteredPending.map(e => e.id))}
         >
-          <button
-            className="button"
-            onClick={() => {
-              const allIds = filteredPending.map((entry) => entry.id);
-              setSelectedPending(allIds);
-            }}
-          >
-            Подтвердить всех
-          </button>
-          <button className="button">Подтвердить выбранных</button>
-          <button className="button">Отклонить всех</button>
-          <button className="button">Отклонить выбранных</button>
-        </div>
+          Подтвердить всех
+        </button>
+        <button
+          className="button"
+          onClick={() => confirmSubmissions(selectedPending)}
+          disabled={selectedPending.length === 0}
+        >
+          Подтвердить выбранных
+        </button>
+        <button
+          className="button"
+          onClick={() => deleteSubmissions(filteredPending.map(e => e.id))}
+        >
+          Отклонить всех
+        </button>
+        <button
+          className="button"
+          onClick={() => deleteSubmissions(selectedPending)}
+          disabled={selectedPending.length === 0}
+        >
+          Отклонить выбранных
+        </button>
+      </div>
 
 
       

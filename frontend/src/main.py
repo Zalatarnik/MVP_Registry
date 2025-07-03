@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from database import SessionLocal, Submission, init_db
+from fastapi import Body
 import shutil
 import os
 
@@ -104,5 +105,31 @@ def list_submissions():
             }
             for s in entries
         ]
+    finally:
+        db.close()
+
+@app.post("/confirm/")
+def confirm_submissions(ids: list[int] = Body(...)):
+    db = SessionLocal()
+    try:
+        db.query(Submission).filter(Submission.id.in_(ids)).update({"status": "confirmed"}, synchronize_session=False)
+        db.commit()
+        return {"status": "ok", "message": "Записи подтверждены"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+@app.post("/delete/")
+def delete_submissions(ids: list[int] = Body(...)):
+    db = SessionLocal()
+    try:
+        db.query(Submission).filter(Submission.id.in_(ids)).delete(synchronize_session=False)
+        db.commit()
+        return {"status": "ok", "message": "Записи удалены"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         db.close()
